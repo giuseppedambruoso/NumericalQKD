@@ -53,7 +53,9 @@ options = optionsParser.Results;
 
 %% module parser
 modParser = moduleParser(mfilename);
-modParser.addRequiredParam("EveDisturbance", @isscalar, @(x) mustBeInRange(x,0,1));
+modParser.addRequiredParam("EveDisturbance",...
+    @isscalar,...
+    @(x) mustBeInRange(x,0,1));
 modParser.parse(params);
 params = modParser.Results;
 p = params.EveDisturbance;

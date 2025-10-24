@@ -1,4 +1,4 @@
-function [newParams,modParser] = GG84ArbitraryDescriptionFunc(params, options,debugInfo)
+function [newParams,modParser] = GG84ArbitraryTNDescriptionFunc(params, options,debugInfo)
 % BasicBB84Alice2DDescriptionFunc A simple description function for a qubit
 % BB84 protocol with no loss that uses the Schmidt decomposition to turn
 % Here, Schmidt decomposition was used to shrink Alice from a 4d space to a
@@ -49,17 +49,17 @@ end
 optionsParser = makeGlobalOptionsParser(mfilename);
 optionsParser.parse(options);
 options = optionsParser.Results;
-
 %% module parser
 modParser = moduleParser(mfilename);
-modParser.addRequiredParam("EveDisturbance",...
+modParser.addRequiredParam("flipProb",...
     @isscalar,...
-    @(x) mustBeInRange(x,0,1));
+    @(x) mustBeInRange(x,0,1))
 modParser.parse(params)
 params = modParser.Results;
 
 %% simple setup
 newParams = struct();
+q = params.flipProb;
 
 %% dimension sizes of Alice and Bob
 dimA = 2;
@@ -77,7 +77,7 @@ newParams.rhoA = eye(dimA)/dimA;
 % of pz comes from a \sqrt(pz) from Alice's measurements(from Schmidt
 
 % Direct reconciliation
-krausOps = {kron(diag([1,0])+diag([0,1]),kron(eye(dimB),zket(2,1)))};
+krausOps = {kron(sqrt(1-q)*eye(dimA)+sqrt(q)*[0 1; 1 0],kron(eye(dimB),zket(2,1)))};
 
 %Here we compute sum_i K^\dagger_i*K_i. Which should satisfy sum_i
 %K^\dagger_i*K_i <= I. A.K.A. the Kraus operators represent a

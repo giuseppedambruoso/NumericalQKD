@@ -1,4 +1,4 @@
-function qkdInput = GG84ArbitraryPreset()
+function qkdInput = GG84ArbitraryTNPreset()
 % BasicBB84PersonalPreset
 % EB-BB84 con canale ignoto (vincoli su rho_AB).
 % - Description: G=Id, pinching Z su A direttamente su AB.
@@ -12,16 +12,18 @@ qkdInput = QKDSolverInput();
 qkdInput.addFixedParameter("alpha", 1.2);
 qkdInput.addFixedParameter("distance", 20);
 qkdInput.addFixedParameter("eps", 1e-8);
-qkdInput.addScanParameter("EveDisturbance", num2cell(linspace(0.01,0.15,12)));
+qkdInput.addScanParameter("EveDisturbance", num2cell(linspace(0.01,0.25,10)));
+qkdInput.addScanParameter("flipProb", num2cell(linspace(0.2,0.3,15)));
+%qkdInput.addFixedParameter("flipProb", 0.3);
 
 %% Modules
-descriptionModule = QKDDescriptionModule(@GG84ArbitraryDescriptionFunc);
+descriptionModule = QKDDescriptionModule(@GG84ArbitraryTNDescriptionFunc);
 qkdInput.setDescriptionModule(descriptionModule);
 
-channelModule = QKDChannelModule(@GG84ArbitraryChannelFunc);
+channelModule = QKDChannelModule(@GG84ArbitraryTNChannelFunc);
 qkdInput.setChannelModule(channelModule);
 
-keyRateModule = QKDKeyRateModule(@GG84ArbitraryKeyRateFunc);
+keyRateModule = QKDKeyRateModule(@GG84ArbitraryTNKeyRateFunc);
 qkdInput.setKeyRateModule(keyRateModule);
 
 %% Math solver
@@ -30,7 +32,7 @@ mathSolverOptions.initMethod = 1;
 mathSolverOptions.frankWolfeMethod = @FrankWolfe.vanilla;
 mathSolverOptions.frankWolfeOptions = struct("maxIter",20,"maxGap",1e-7);
 mathSolverOptions.linearConstraintTolerance = 1e-10;
-mathSolverMod = QKDMathSolverModule(@FW2StepSolver, mathSolverOptions);
+mathSolverMod = QKDMathSolverModule(@GG84ArbitraryTNFW2StepSolver, mathSolverOptions);
 qkdInput.setMathSolverModule(mathSolverMod);
 
 %% Opzioni globali
