@@ -13,8 +13,8 @@ classdef QKDPlot
             arguments
                 qkdInput (1,1) QKDSolverInput{QKDSolverInputMustHaveExactlyOneScanParam}
                 results (:,1) struct
-                options.xScaleStyle (1,1) string {mustBeMember(options.xScaleStyle,["linear","log","dB"])} = "dB";
-                options.yScaleStyle (1,1) string {mustBeMember(options.yScaleStyle,["linear","log","dB"])} = "log";
+                options.xScaleStyle (1,1) string {mustBeMember(options.xScaleStyle,["linear","log","dB"])} = "linear";
+                options.yScaleStyle (1,1) string {mustBeMember(options.yScaleStyle,["linear","log","dB"])} = "linear";
                 options.markerLineStyles (1,1) string = "x-";
                 options.figAxis (1,1) matlab.graphics.axis.Axes = axes(figure());
             end

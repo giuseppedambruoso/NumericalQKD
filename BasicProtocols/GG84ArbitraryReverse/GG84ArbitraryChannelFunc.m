@@ -1,4 +1,4 @@
-function [newParams, modParser]= GG84ArbitraryTNChannelFunc(params,options,debugInfo)
+function [newParams, modParser]= GG84ArbitraryChannelFuncReverse(params,options,debugInfo)
 % GG84ArbitraryChannelFunc a simple channel function for a qubit based
 % BB84 protocol with no loss. This channel model allows for depolarization
 % and misalignment between Alice and Bob's detectors. Here, Schmidt
@@ -53,9 +53,7 @@ options = optionsParser.Results;
 
 %% module parser
 modParser = moduleParser(mfilename);
-modParser.addRequiredParam("EveDisturbance",...
-    @isscalar,...
-    @(x) mustBeInRange(x,0,1));
+modParser.addRequiredParam("EveDisturbance", @isscalar, @(x) mustBeInRange(x,0,1));
 modParser.parse(params);
 params = modParser.Results;
 p = params.EveDisturbance;

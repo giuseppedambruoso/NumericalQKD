@@ -1,4 +1,4 @@
-function [keyRate, modParser] = BasicKeyRateFunc(params,options,mathSolverFunc,debugInfo)
+function [keyRate, modParser] = GG84ArbitraryKeyRateFuncReverse(params,options,mathSolverFunc,debugInfo)
 % BasicKeyRateFunc A simple key rate function for a asymptotic key rate
 % calculations with equality constraints and deterministic key map.
 %
@@ -9,25 +9,29 @@ function [keyRate, modParser] = BasicKeyRateFunc(params,options,mathSolverFunc,d
 %   made ordered in the same way as the columns of expectationsJoint.
 % * announcementsB: Array of announcements made for each measurement Bob
 %   made ordered in the same way as the rows of expectationsJoint.
-% * keyMap: An array of KeyMapElement objects that contain pairs of accepted
-%   announcements and an array dictating the mapping of Alice's measurement
-%   outcome to key bits (May be written with Strings).
+% * keyMap: An array of KeyMapElement objects that contain pairs of
+%   accepted announcements and an array dictating the mapping of Alice's
+%   measurement outcome to key bits (May be written with Strings).
 % * krausOps: A cell array of matrices. The Kraus operators that form the G
 %   map on Alice and Bob's joint system. These should form a completely
-%   postive trace non-increasing linear map. Each Kraus operator must be
+%   positive trace non-increasing linear map. Each Kraus operator must be
 %   the same size.
-% * keyProj:  A cell array of projection operators that perform the pinching map
-%   key on  G(\rho). These projection operators should sum to identity.
-% * fEC: error correction effiency. Set to 1 means for Shannon limit.
+% * keyProj:  A cell array of projection operators that perform the
+%   pinching map key on  G(\rho). These projection operators should sum to
+%   identity.
+% * fEC: error correction efficiency. Set to 1 means for Shannon limit.
 % * observablesJoint: The joint observables of Alice and Bob's
-%   measurments. The observables must be hermitian and each must be the size
-%   dimA*dimB by dimA*dimB. The observables assume the spaces are ordered A \otimes B.
-%   They also should be positive semi-definite and should sum to identity.
+%   measurements. The observables must be Hermitian and each must be the
+%   size dimA*dimB by dimA*dimB. The observables assume the spaces are
+%   ordered A \otimes B. They also should be positive semi-definite and
+%   should sum to identity.
 % * expectationsJoint: The joint expectations (as an array) from Alice and
 %   Bob's measurements that line up with it's corresponding observable in
-%   observablesJoint. These values should be betwen 0 and 1.
+%   observablesJoint. These values should be between 0 and 1.
 % * rhoA (nan): The fixed known density matrix on Alice's side for
-%   prepare-and-measure protocols.
+%   prepare-and-measure protocols. Setting to nan means this is ignored and
+%   no rhoA constraint is passed to the convex solver. Furthermore, an
+%   explicit Tr[rhoAB] == 1 constraint is added in its place.
 % Outputs:
 % * keyrate: Key rate of the QKD protocol measured in bits per block
 %   processed.
@@ -52,49 +56,19 @@ end
 optionsParser = makeGlobalOptionsParser(mfilename);
 optionsParser.parse(options);
 options = optionsParser.Results;
-
-
 %% modParser
 modParser = moduleParser(mfilename);
-
-modParser.addRequiredParam("observablesJoint",@(x) allCells(x,@ishermitian));
-modParser.addRequiredParam("expectationsJoint",@mustBeProbDist);
-modParser.addAdditionalConstraint(@isEqualSize,["observablesJoint","expectationsJoint"]);
-
+modParser.addRequiredParam("alpha", @(x) mustBeGreaterThan(x,1));
 modParser.addRequiredParam("krausOps", @isCPTNIKrausOps);
 modParser.addRequiredParam("keyProj", @(x) mustBeAKeyProj(x));
-
-modParser.addRequiredParam("dimA",...
-    @isscalar,...
-    @mustBeInteger,...
-    @mustBePositive);
-modParser.addRequiredParam("dimB",...
-    @isscalar,...
-    @mustBeInteger,...
-    @mustBePositive);
-modParser.addAdditionalConstraint(@observablesAndDimensionsMustBeTheSame,["observablesJoint","dimA","dimB"])
-
-modParser.addRequiredParam("announcementsA")
-modParser.addRequiredParam("announcementsB")
-modParser.addRequiredParam("keyMap",@(x)mustBeA(x,"KeyMapElement"))
-modParser.addAdditionalConstraint(@mustBeSizedLikeAnnouncements,["expectationsJoint","announcementsA","announcementsB"])
-
-modParser.addRequiredParam("fEC",...
-    @isscalar, ...
-    @(x) mustBeGreaterThanOrEqual(x,1));
-
+modParser.addRequiredParam("EveDisturbance", @isscalar, @(x) mustBeInRange(x,0,1));
 modParser.addOptionalParam("rhoA", nan, @(x) isequaln(x,nan) || isDensityOperator(x));
-
-
-modParser.addOptionalParam("blockDimsA", nan, @isBlockDimsWellFormated);
-modParser.addOptionalParam("blockDimsB", nan, @isBlockDimsWellFormated);
-modParser.addAdditionalConstraint(@(x,y) blockDimsMustMatch(x,y),["blockDimsA","dimA"]);
-modParser.addAdditionalConstraint(@(x,y) blockDimsMustMatch(x,y),["blockDimsB","dimB"]);
-modParser.addAdditionalConstraint(@(blockDimsA,blockDimsB) ~xor(isequaln(blockDimsA,nan),isequaln(blockDimsB,nan)),["blockDimsA","blockDimsB"]);
-
-modParser.addRequiredParam("alpha", @(x) mustBeGreaterThan(x,1));
+modParser.addRequiredParam("observablesJoint",@(x) allCells(x,@ishermitian));
+modParser.addRequiredParam("expectationsJoint",@(x) mustBeInRange(x,-1,1))
+modParser.addAdditionalConstraint(@isEqualSize,["observablesJoint","expectationsJoint"]);
 
 modParser.parse(params);
+
 
 params = modParser.Results;
 
@@ -103,42 +77,37 @@ debugMathSolver = debugInfo.addLeaves("mathSolver");
 mathSolverInput = struct();
 
 %% Error correction
-
-deltaLeak = errorCorrectionCost(params.announcementsA,params.announcementsB,...
-    params.expectationsJoint,params.keyMap,params.fEC);
+qber = params.EveDisturbance;
+deltaLeak = -qber*log2(qber)-(1-qber)*log2(1-qber);
 debugInfo.storeInfo("deltaLeak",deltaLeak);
 
 
 %% translate for the math solver
 %now we have all the parts we need to get a key rate from the a math
 %solver, but we need to put it into a form it can understand.
-%first we give it the kraus operators for the G map and the projection
+%first we give it the Kraus operators for the G map and the projection
 %operators for the key map (Z).
 mathSolverInput.krausOps = params.krausOps;
 mathSolverInput.keyProj = params.keyProj;
-% also include rhoA from the description if it was given
-if ~isequaln(params.rhoA,nan)
-    mathSolverInput.rhoA = params.rhoA;
-end
+mathSolverInput.alpha = params.alpha;
 
 numObs = numel(params.observablesJoint);
 
 mathSolverInput.equalityConstraints = arrayfun(@(x)...
     EqualityConstraint(params.observablesJoint{x},params.expectationsJoint(x)),1:numObs);
 
-% if block diag information was give, then pass it to the solver.
-if ~isequaln(params.blockDimsA,nan)
-    mathSolverInput.blockDimsA = params.blockDimsA;
-    mathSolverInput.blockDimsB = params.blockDimsB;
+% Include rhoA (if given) or add an explicit Tr[rhoAB] == 1 constraint.
+if ~isequaln(params.rhoA,nan)
+    mathSolverInput.rhoA = params.rhoA;
+else
+    mathSolverInput.equalityConstraints(end+1) = EqualityConstraint(eye(params.dimA*params.dimB),1);
 end
-
-mathSolverInput.alpha = params.alpha;
 
 % now we call the math solver function on the formulated inputs, with
 % it's options.
 [relEnt,~] = mathSolverFunc(mathSolverInput,debugMathSolver);
 
-%store the key rate (even if negative)
+%store the key rate
 keyRate = max(0,relEnt-deltaLeak);
 
 if options.verboseLevel>=1
@@ -146,7 +115,7 @@ if options.verboseLevel>=1
     fprintf("Key rate: %e\n",max(keyRate,0));
 end
 
-%set the linearization estimate key rate as well for debuging
+%set the linearization estimate key rate as well for debugging
 if isfield(debugMathSolver.info,"relEntStep2Linearization")
     keyRateStep2Linearization = debugMathSolver.info.relEntStep2Linearization - deltaLeak;
     debugInfo.storeInfo("keyRateRelEntStep2Linearization",keyRateStep2Linearization)

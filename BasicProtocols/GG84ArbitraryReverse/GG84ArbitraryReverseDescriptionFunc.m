@@ -1,4 +1,4 @@
-function [newParams,modParser] = GG84ArbitraryTNDescriptionFunc(params, options,debugInfo)
+function [newParams,modParser] = GG84ArbitraryReverseDescriptionFunc(params, options,debugInfo)
 % BasicBB84Alice2DDescriptionFunc A simple description function for a qubit
 % BB84 protocol with no loss that uses the Schmidt decomposition to turn
 % Here, Schmidt decomposition was used to shrink Alice from a 4d space to a
@@ -49,17 +49,17 @@ end
 optionsParser = makeGlobalOptionsParser(mfilename);
 optionsParser.parse(options);
 options = optionsParser.Results;
+
 %% module parser
 modParser = moduleParser(mfilename);
-modParser.addRequiredParam("flipProb",...
+modParser.addRequiredParam("EveDisturbance",...
     @isscalar,...
-    @(x) mustBeInRange(x,0,1))
+    @(x) mustBeInRange(x,0,1));
 modParser.parse(params)
 params = modParser.Results;
 
 %% simple setup
 newParams = struct();
-q = params.flipProb;
 
 %% dimension sizes of Alice and Bob
 dimA = 2;
@@ -76,13 +76,15 @@ newParams.rhoA = eye(dimA)/dimA;
 % RBC. This lets us save time on computing eigen values later. The factor
 % of pz comes from a \sqrt(pz) from Alice's measurements(from Schmidt
 
-proj1 = zket(4,1)'*zket(4,1);
-proj2 = zket(4,2)'*zket(4,2);
-proj3 = zket(4,3)'*zket(4,3);
-proj4 = zket(4,4)'*zket(4,4);
-% Direct reconciliation
-K_zz = kron(zket(2,1),sqrtm(q*
-krausOps = {kron(sqrt(1-q)*eye(dimA)+sqrt(q)*[0 1; 1 0],kron(eye(dimB),zket(2,1)))};
+% Reverse reconciliation
+ketZ = [1;0]; ketO = [0;1];
+ketP = [1;1]/sqrt(2); ketM = [1;-1]/sqrt(2);
+projZ = ketZ * ketZ'; projO = ketO * ketO';
+projP = ketP * ketP'; projM = ketM * ketM';
+%krausOpX = (1-pz)*kron(kron(projP+projM,ketZ*ketP'+ketO*ketM'),zket(2,1));
+%krausOpZ = pz*kron(kron(projZ+projO,projZ+projO),zket(2,2));
+%krausOps = {krausOpZ,krausOpX};
+krausOps = {kron(kron(projZ+projO,projZ+projO),zket(2,2))};
 
 %Here we compute sum_i K^\dagger_i*K_i. Which should satisfy sum_i
 %K^\dagger_i*K_i <= I. A.K.A. the Kraus operators represent a

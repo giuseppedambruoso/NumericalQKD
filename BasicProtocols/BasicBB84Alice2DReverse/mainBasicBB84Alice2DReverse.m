@@ -1,6 +1,6 @@
 % qubit BB84 prepare and measure. We use schmidt decomposition to reduce
 % the dimension of Alice's state for enchanced speed and stability.
-qkdInput = BasicBB84Alice2DPreset();
+qkdInput = BasicBB84Alice2DPresetReverse();
 
 %run the QKDSolver with this input
 results = MainIteration(qkdInput);
