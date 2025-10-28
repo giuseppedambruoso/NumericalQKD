@@ -100,8 +100,8 @@ debugInfo.storeInfo("krausSum",krausSum);
 % projectors form a pinching map that measures the key register.
 % (in a sense, we want to break any quantum correlations between this
 % register and any of the remaining registers.)
-proj0 = kron(diag([1,0]),eye(dimB*2));
-proj1 = kron(diag([0,1]),eye(dimB*2));
+proj0 = kron(eye(dimB),kron(diag([1,0]),eye(dimB)));
+proj1 = kron(eye(dimB),kron(diag([0,1]),eye(dimB)));
 keyProj = {proj0,proj1};
 
 %% set Kraus ops and key projection in new parameters

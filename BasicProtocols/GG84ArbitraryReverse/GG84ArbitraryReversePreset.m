@@ -21,7 +21,7 @@ qkdInput.setDescriptionModule(descriptionModule);
 channelModule = QKDChannelModule(@GG84ArbitraryChannelFunc);
 qkdInput.setChannelModule(channelModule);
 
-keyRateModule = QKDKeyRateModule(@GG84ArbitraryKeyRateFunc);
+keyRateModule = QKDKeyRateModule(@GG84ArbitraryKeyRateFuncReverse);
 qkdInput.setKeyRateModule(keyRateModule);
 
 %% Math solver

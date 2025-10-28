@@ -1,4 +1,4 @@
-function [keyRate, modParser] = GG84ArbitraryKeyRateFuncReverse(params,options,mathSolverFunc,debugInfo)
+function [keyRate, modParser] = GG84ArbitraryTNKeyRateFunc(params,options,mathSolverFunc,debugInfo)
 % BasicKeyRateFunc A simple key rate function for a asymptotic key rate
 % calculations with equality constraints and deterministic key map.
 %
@@ -59,12 +59,13 @@ options = optionsParser.Results;
 %% modParser
 modParser = moduleParser(mfilename);
 modParser.addRequiredParam("alpha", @(x) mustBeGreaterThan(x,1));
-modParser.addRequiredParam("krausOps", @isCPTNIKrausOps);
+modParser.addRequiredParam("krausOps");%, @isCPTNIKrausOps);
 modParser.addRequiredParam("keyProj", @(x) mustBeAKeyProj(x));
 modParser.addRequiredParam("EveDisturbance", @isscalar, @(x) mustBeInRange(x,0,1));
 modParser.addOptionalParam("rhoA", nan, @(x) isequaln(x,nan) || isDensityOperator(x));
 modParser.addRequiredParam("observablesJoint",@(x) allCells(x,@ishermitian));
-modParser.addRequiredParam("expectationsJoint",@(x) mustBeInRange(x,-1,1))
+modParser.addRequiredParam("expectationsJoint",@(x) mustBeInRange(x,-1,1));
+modParser.addRequiredParam("flipProb", @(x) mustBeInRange(x,0,1));
 modParser.addAdditionalConstraint(@isEqualSize,["observablesJoint","expectationsJoint"]);
 
 modParser.parse(params);
@@ -77,7 +78,7 @@ debugMathSolver = debugInfo.addLeaves("mathSolver");
 mathSolverInput = struct();
 
 %% Error correction
-qber = params.EveDisturbance;
+qber = params.EveDisturbance+params.flipProb-2*params.EveDisturbance*params.flipProb;
 deltaLeak = -qber*log2(qber)-(1-qber)*log2(1-qber);
 debugInfo.storeInfo("deltaLeak",deltaLeak);
 

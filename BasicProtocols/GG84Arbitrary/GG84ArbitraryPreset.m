@@ -15,13 +15,13 @@ qkdInput.addFixedParameter("eps", 1e-8);
 qkdInput.addScanParameter("EveDisturbance", num2cell(linspace(0.01,0.15,12)));
 
 %% Modules
-descriptionModule = QKDDescriptionModule(@GG84ArbitraryTNDescriptionFunc);
+descriptionModule = QKDDescriptionModule(@GG84ArbitraryDescriptionFunc);
 qkdInput.setDescriptionModule(descriptionModule);
 
-channelModule = QKDChannelModule(@GG84ArbitraryTNChannelFunc);
+channelModule = QKDChannelModule(@GG84ArbitraryChannelFunc);
 qkdInput.setChannelModule(channelModule);
 
-keyRateModule = QKDKeyRateModule(@GG84ArbitraryTNKeyRateFunc);
+keyRateModule = QKDKeyRateModule(@GG84ArbitraryKeyRateFunc);
 qkdInput.setKeyRateModule(keyRateModule);
 
 %% Math solver

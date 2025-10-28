@@ -1,4 +1,4 @@
-function [newParams,modParser] = GG84ArbitraryTNDescriptionFunc(params, options,debugInfo)
+function [newParams,modParser] = GG84ArbitraryTNReverseDescriptionFunc(params, options,debugInfo)
 % BasicBB84Alice2DDescriptionFunc A simple description function for a qubit
 % BB84 protocol with no loss that uses the Schmidt decomposition to turn
 % Here, Schmidt decomposition was used to shrink Alice from a 4d space to a
@@ -76,13 +76,12 @@ newParams.rhoA = eye(dimA)/dimA;
 % RBC. This lets us save time on computing eigen values later. The factor
 % of pz comes from a \sqrt(pz) from Alice's measurements(from Schmidt
 
-proj1 = zket(4,1)'*zket(4,1);
-proj2 = zket(4,2)'*zket(4,2);
-proj3 = zket(4,3)'*zket(4,3);
-proj4 = zket(4,4)'*zket(4,4);
 % Reverse reconciliation
-krausOps = {kron(sqrt(1-q)*eye(dimA)+sqrt(q)*[0 1; 1 0],kron(eye(dimB),zket(2,1)))};
-
+ketZ = [1;0]; ketO = [0;1];
+ketP = [1;1]/sqrt(2); ketM = [1;-1]/sqrt(2);
+projZ = ketZ * ketZ'; projO = ketO * ketO';
+projP = ketP * ketP'; projM = ketM * ketM';
+krausOps = {kron(eye(dimA),kron(sqrt(1-q)*eye(dimB)+sqrt(q)*(ketZ*ketO'+ketO*ketZ'),zket(2,1)))};
 %Here we compute sum_i K^\dagger_i*K_i. Which should satisfy sum_i
 %K^\dagger_i*K_i <= I. A.K.A. the Kraus operators represent a
 %completely positive, trace non-increasing linear map.
@@ -97,8 +96,8 @@ debugInfo.storeInfo("krausSum",krausSum);
 % projectors form a pinching map that measures the key register.
 % (in a sense, we want to break any quantum correlations between this
 % register and any of the remaining registers.)
-proj0 = kron(diag([1,0]),eye(dimB*2));
-proj1 = kron(diag([0,1]),eye(dimB*2));
+proj0 = kron(eye(dimB),kron(diag([1,0]),eye(dimB)));
+proj1 = kron(eye(dimB),kron(diag([0,1]),eye(dimB)));
 keyProj = {proj0,proj1};
 
 %% set Kraus ops and key projection in new parameters
