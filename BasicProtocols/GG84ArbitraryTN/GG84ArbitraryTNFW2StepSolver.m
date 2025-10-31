@@ -69,7 +69,7 @@ function [relEntLowerBound,modParser] = GG84ArbitraryTNFW2StepSolver(params,opti
 % * linearSearchMinStep (1e-3): Minimum step size fminbnd must take
 %   during the Frank Wolf algorithm. Initially, this can help with faster
 %   convergence, but can also just prevent convergence. See fminbnd for
-%   more details (the second argument, x1, in the function).
+%   more details (the second argument, x1, in the function). per andare a fare la spesa
 % * linearConstraintTolerance (1e-10): constraint tolerance on the
 %   equalityConstraints, inequalityConstraints, vectorOneNormConstraints
 %   and matrixOneNormConstraints. A bit broader than the name suggests.
@@ -116,7 +116,7 @@ end
 %start with the global parser and add on the extra options
 optionsParser = makeGlobalOptionsParser(mfilename);
 
-optionsParser.addOptionalParam("maxIter",40,@mustBeInteger);
+optionsParser.addOptionalParam("maxIter",20,@mustBeInteger);
 optionsParser.addAdditionalConstraint(@(x) x>0, "maxIter");
 optionsParser.addOptionalParam("maxGap",1e-5,@(x) x>0);
 optionsParser.addOptionalParam("linearSearchPrecision",1e-20,@(x) x>0);

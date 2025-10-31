@@ -9,7 +9,7 @@ function qkdInput = GG84ArbitraryTNPreset()
 qkdInput = QKDSolverInput();
 
 %% Parameters
-qkdInput.addFixedParameter("alpha", 1.2);
+qkdInput.addFixedParameter("alpha", 1.00000000001);
 qkdInput.addFixedParameter("distance", 20);
 qkdInput.addFixedParameter("eps", 1e-8);
 qkdInput.addScanParameter("EveDisturbance", num2cell(linspace(0.01,0.15,12)));

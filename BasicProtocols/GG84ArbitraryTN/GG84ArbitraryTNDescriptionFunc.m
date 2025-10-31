@@ -75,13 +75,7 @@ newParams.rhoA = eye(dimA)/dimA;
 % an isometry to shrink the Kraus operators from outputting on RABC to just
 % RBC. This lets us save time on computing eigen values later. The factor
 % of pz comes from a \sqrt(pz) from Alice's measurements(from Schmidt
-
-proj1 = zket(4,1)'*zket(4,1);
-proj2 = zket(4,2)'*zket(4,2);
-proj3 = zket(4,3)'*zket(4,3);
-proj4 = zket(4,4)'*zket(4,4);
-% Reverse reconciliation
-krausOps = {kron(sqrt(1-q)*eye(dimA)+sqrt(q)*[0 1; 1 0],kron(eye(dimB),zket(2,1)))};
+krausOps = {kron(kron([sqrt(1-q),sqrt(q);sqrt(q),sqrt(1-q)],eye(dimB)),zket(2,1))};
 
 %Here we compute sum_i K^\dagger_i*K_i. Which should satisfy sum_i
 %K^\dagger_i*K_i <= I. A.K.A. the Kraus operators represent a

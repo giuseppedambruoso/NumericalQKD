@@ -78,9 +78,6 @@ newParams.rhoA = eye(dimA)/dimA;
 
 % Reverse reconciliation
 ketZ = [1;0]; ketO = [0;1];
-ketP = [1;1]/sqrt(2); ketM = [1;-1]/sqrt(2);
-projZ = ketZ * ketZ'; projO = ketO * ketO';
-projP = ketP * ketP'; projM = ketM * ketM';
 krausOps = {kron(eye(dimA),kron(sqrt(1-q)*eye(dimB)+sqrt(q)*(ketZ*ketO'+ketO*ketZ'),zket(2,1)))};
 %Here we compute sum_i K^\dagger_i*K_i. Which should satisfy sum_i
 %K^\dagger_i*K_i <= I. A.K.A. the Kraus operators represent a
