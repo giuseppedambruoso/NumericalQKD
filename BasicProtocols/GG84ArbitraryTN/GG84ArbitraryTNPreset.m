@@ -13,7 +13,7 @@ qkdInput.addFixedParameter("renyi", false);
 qkdInput.addFixedParameter("alpha", 1.00000000001);
 qkdInput.addFixedParameter("distance", 20);
 qkdInput.addFixedParameter("eps", 1e-8);
-qkdInput.addScanParameter("EveDisturbance", num2cell(linspace(0.01,0.15,12)));
+qkdInput.addScanParameter("EveDisturbance", num2cell(linspace(0.01,0.15,30)));
 qkdInput.addScanParameter("flipProb", num2cell([0, 0.2, 0.5]))
 %qkdInput.addScanParameter("flipProb", num2cell(linspace(0.2,0.3,15)));
 %qkdInput.addFixedParameter("flipProb", 0.3);

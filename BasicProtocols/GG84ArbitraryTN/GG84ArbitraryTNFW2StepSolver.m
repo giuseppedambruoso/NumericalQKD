@@ -116,7 +116,7 @@ end
 %start with the global parser and add on the extra options
 optionsParser = makeGlobalOptionsParser(mfilename);
 
-optionsParser.addOptionalParam("maxIter",20,@mustBeInteger);
+optionsParser.addOptionalParam("maxIter",300,@mustBeInteger);
 optionsParser.addAdditionalConstraint(@(x) x>0, "maxIter");
 optionsParser.addOptionalParam("maxGap",1e-5,@(x) x>0);
 optionsParser.addOptionalParam("linearSearchPrecision",1e-20,@(x) x>0);
