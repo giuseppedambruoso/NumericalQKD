@@ -1,4 +1,4 @@
-function fval = primalfep(perturbation, alpha, rho,keyProj,krausOperators,safeCutOff)
+function fval = primalfep(renyi, perturbation, alpha, rho,keyProj,krausOperators,safeCutOff)
 % primalfep Calculates the value $f_{\epsilon}(\rho)$, where the epsilon
 % value is carefully chosen to ensure the gradient exists (use
 % perturbationChannelEpsilon).
@@ -21,6 +21,7 @@ function fval = primalfep(perturbation, alpha, rho,keyProj,krausOperators,safeCu
 arguments
     %minimial checks just to make sure cells are formatted in the correct
     %orientation.
+    renyi logical
     perturbation (1,1) double
     alpha (1,1) double
     rho (:,:) double {mustBeHermitian, mustFollowPerturbationTheorem(perturbation,rho)}
@@ -36,6 +37,10 @@ zRho = ApplyMap(gRho, keyProj);
 gRho = perturbationChannel(gRho, perturbation);
 zRho = perturbationChannel(zRho, perturbation);
 
-% fval = real(trace(gRho*(logmsafe(gRho,safeCutOff)-logmsafe(zRho,safeCutOff))));
-fval = real(RenyiEntropy(alpha, gRho, zRho));
+if renyi
+    fval = real(RenyiEntropy(alpha, gRho, zRho));
+else  
+    fval = real(trace(gRho*(logmsafe(gRho,safeCutOff)-logmsafe(zRho,safeCutOff))));
+end
+
 end

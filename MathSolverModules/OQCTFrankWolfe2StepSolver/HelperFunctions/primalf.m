@@ -1,4 +1,4 @@
-function fval = primalf(rho,keyProj,krausOperators, alpha)
+function fval = primalf(renyi, rho,keyProj,krausOperators, alpha)
 % primalf Computes the primal objective function $f(\rho) := 
 % D(\mathcal{G}(\rho)||\mathcal{Z}(\mathcal{G}(\rho)))$
 %
@@ -15,7 +15,8 @@ function fval = primalf(rho,keyProj,krausOperators, alpha)
 % See also primalDf, primalfep, FW2StepSolver
 arguments
     %minimial checks just to make sure cells are formatted in the correct
-    %orientation. 
+    %orientation.
+    renyi logical
     rho (:,:) double {mustBeHermitian}
     keyProj (:,1) cell
     krausOperators (:,1) cell
@@ -38,6 +39,9 @@ end
 gRho=perturbationChannel(gRho,perturbation);
 zRho=perturbationChannel(zRho,perturbation);
 
-% fval = real(trace(gRho*(logm(gRho)-logm(zRho)))); % calculate the quantum relative entropy
-fval = real(RenyiEntropy(alpha, gRho, zRho));
+if renyi
+    fval = real(RenyiEntropy(alpha, gRho, zRho));
+else
+    fval = real(trace(gRho*(logm(gRho)-logm(zRho)))); % calculate the quantum relative entropy
+
 end

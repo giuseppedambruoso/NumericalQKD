@@ -58,6 +58,8 @@ optionsParser.parse(options);
 options = optionsParser.Results;
 %% modParser
 modParser = moduleParser(mfilename);
+
+modParser.addRequiredParam("renyi", @mustBeBoolean);
 modParser.addRequiredParam("alpha", @(x) mustBeGreaterThan(x,1));
 modParser.addRequiredParam("krausOps", @isCPTNIKrausOps);
 modParser.addRequiredParam("keyProj", @(x) mustBeAKeyProj(x));
@@ -71,7 +73,6 @@ modParser.parse(params);
 
 
 params = modParser.Results;
-
 %% simple setup
 debugMathSolver = debugInfo.addLeaves("mathSolver");
 mathSolverInput = struct();
@@ -90,6 +91,7 @@ debugInfo.storeInfo("deltaLeak",deltaLeak);
 mathSolverInput.krausOps = params.krausOps;
 mathSolverInput.keyProj = params.keyProj;
 mathSolverInput.alpha = params.alpha;
+mathSolverInput.renyi = params.renyi;
 
 numObs = numel(params.observablesJoint);
 

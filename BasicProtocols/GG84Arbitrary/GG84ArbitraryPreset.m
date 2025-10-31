@@ -9,10 +9,11 @@ function qkdInput = GG84ArbitraryPreset()
 qkdInput = QKDSolverInput();
 
 %% Parameters
+qkdInput.addFixedParameter("renyi", false);
 qkdInput.addFixedParameter("alpha", 1.00000000001);
 qkdInput.addFixedParameter("distance", 20);
 qkdInput.addFixedParameter("eps", 1e-8);
-qkdInput.addScanParameter("EveDisturbance", num2cell(linspace(0.01,0.15,12)));
+qkdInput.addScanParameter("EveDisturbance", num2cell(linspace(0.01,0.111,100)));
 
 %% Modules
 descriptionModule = QKDDescriptionModule(@GG84ArbitraryDescriptionFunc);

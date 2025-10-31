@@ -57,6 +57,7 @@ options = optionsParser.Results;
 %% modParser
 modParser = moduleParser(mfilename);
 
+modParser.addRequiredParam("renyi", @mustBeBoolean);
 modParser.addRequiredParam("observablesJoint",@(x) allCells(x,@ishermitian));
 modParser.addRequiredParam("expectationsJoint",@mustBeProbDist);
 modParser.addAdditionalConstraint(@isEqualSize,["observablesJoint","expectationsJoint"]);
@@ -97,7 +98,6 @@ modParser.addRequiredParam("alpha", @(x) mustBeGreaterThan(x,1));
 modParser.parse(params);
 
 params = modParser.Results;
-
 %% simple setup
 debugMathSolver = debugInfo.addLeaves("mathSolver");
 mathSolverInput = struct();

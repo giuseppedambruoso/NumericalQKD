@@ -1,10 +1,11 @@
-function [rho, fval, gap] = step1Solver(rho0,eqCons,ineqCons,vec1NormCons,mat1NormCons,krausOps,keyProj,alpha,options,debugInfo)
+function [rho, fval, gap] = step1Solver(renyi,rho0,eqCons,ineqCons,vec1NormCons,mat1NormCons,krausOps,keyProj,alpha,options,debugInfo)
 % Part of the FW2StepSolver. Don't use or touch this if you don't know what
 % that means.
 %
 % See also: FW2StepSolver
 arguments
     %very basic argument validation.
+    renyi logical
     rho0 (:,:) double {mustBeHermitian}
     eqCons (:,1) EqualityConstraint
     ineqCons (:,1) InequalityConstraint
@@ -42,7 +43,7 @@ end
 %ensure rho is expressed in full, and not as a sparse matrix
 rho = full(rho);
 %calculate initial value
-fval = primalf(rho,keyProj,krausOps,alpha);
+fval = primalf(renyi,rho,keyProj,krausOps,alpha);
 
 subproblemStatus = string.empty();
 debugInfo.storeInfo("subproblemStatus",subproblemStatus);
@@ -65,7 +66,7 @@ for iter = 1:options.maxIter
     end
     
     %Caluclate gradient of primal
-    gradf = primalDf(rho,keyProj,krausOps, alpha); % numerator form
+    gradf = primalDf(renyi,rho,keyProj,krausOps, alpha); % numerator form
 
     %Find step direction
     [deltaRho,cvxStatus] = subproblem(rho,gradf,eqCons,ineqCons,...
@@ -84,13 +85,13 @@ for iter = 1:options.maxIter
 
     %Do exact line search in step direction deltaRho to find step size
     optimOptions = optimset('TolX',options.linearSearchPrecision);
-    stepSize = fminbnd(@(t)primalf(rho+t*deltaRho,keyProj,krausOps,alpha),options.linearSearchMinStep,1,optimOptions);
+    stepSize = fminbnd(@(t)primalf(renyi,rho+t*deltaRho,keyProj,krausOps,alpha),options.linearSearchMinStep,1,optimOptions);
 
     %Calculate the gap as a measure on the suboptimality of the FW
     %iteration
     gap = -real(trace(gradf*deltaRho)); %now in numerator convention
     %Corresponding function value at new point
-    f1 = primalf(rho+stepSize*deltaRho,keyProj,krausOps, alpha);
+    f1 = primalf(renyi,rho+stepSize*deltaRho,keyProj,krausOps, alpha);
 
     if options.verboseLevel>= 1
         tFW = toc(tstartFW);

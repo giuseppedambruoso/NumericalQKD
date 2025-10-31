@@ -1,4 +1,4 @@
-function Dfval = primalDfep(perturbation, alpha, rho, keyProj, krausOperators,safeCutOff)
+function Dfval = primalDfep(renyi, perturbation, alpha, rho, keyProj, krausOperators,safeCutOff)
 % primalDfep Computes the value [nabla f_epsilon(rho)], where the epsilon
 % value is carefully chosen perturbation. To ensure the gradient exists
 % (use perturbationChannelEpsilon). The gradient follows the numerator
@@ -19,6 +19,7 @@ function Dfval = primalDfep(perturbation, alpha, rho, keyProj, krausOperators,sa
 arguments
     %minimial checks just to make sure cells are formatted in the correct
     %orientation.
+    renyi logical
     perturbation (1,1) double
     alpha (1,1) double
     rho (:,:) double {mustBeHermitian,mustFollowPerturbationTheorem(perturbation,rho)}
@@ -38,7 +39,11 @@ logGRho = perturbationChannel(logmsafe(gRho,safeCutOff), perturbation);
 logZRho = perturbationChannel(logmsafe(zRho,safeCutOff), perturbation);
 
 %Apply G^\dagger
-% Dfval = ApplyMap(logGRho-logZRho,DualMap(krausOperators));
-Dfval = GradRenyiEntropy(alpha, gRho, zRho, krausOperators,keyProj);
+if renyi
+    Dfval = GradRenyiEntropy(alpha, gRho, zRho, krausOperators,keyProj);
+else
+    Dfval = ApplyMap(logGRho-logZRho,DualMap(krausOperators));
+end
+
 Dfval = (Dfval+Dfval')/2;
 end

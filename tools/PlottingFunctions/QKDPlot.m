@@ -86,7 +86,7 @@ function simple2DPlot(qkdInput, results, options)
 
     % Parametri Q e q
     Q = linspace(0, 0.11, 1000);
-    qs = [0, 0.01, 0.1, 0.2, 0.3];
+    qs = [0.00000001, 0.2, 0.5];
 
     % Funzione s(q,Q) con protezione contro piccoli negativi numerici
     s_fun = @(q, Qv) sqrt( max(0, 1 - 16*q*(1-q).*Qv.*(1-Qv)) );

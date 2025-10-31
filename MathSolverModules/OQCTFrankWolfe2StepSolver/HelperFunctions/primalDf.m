@@ -1,4 +1,4 @@
-function dfval = primalDf(rho,keyProj,krausOperators, alpha)
+function dfval = primalDf(renyi, rho,keyProj,krausOperators, alpha)
 % primalDf Computes the gradient of the primal problem's objective
 % function. The Gradiant follows the numerator convention for matrix
 % derivatives.
@@ -16,7 +16,8 @@ function dfval = primalDf(rho,keyProj,krausOperators, alpha)
 % See also primalDfep, primalf, primalfep
 arguments
     %minimial checks just to make sure cells are formatted in the correct
-    %orientation. 
+    %orientation.
+    renyi logical
     rho (:,:) double {mustBeHermitian}
     keyProj (:,1) cell
     krausOperators (:,1) cell
@@ -39,9 +40,12 @@ zRho=perturbationChannel(zRho,perturbation);
 logGRho = perturbationChannel(logm(gRho),perturbation);
 logZRho = perturbationChannel(logm(zRho),perturbation);
 
-% apply the logs and inverse G map.
-% dfval = ApplyMap(logGRho-logZRho,DualMap(krausOperators));
+if renyi
+    dfval = GradRenyiEntropy(alpha, gRho, zRho, krausOperators,keyProj);
+else
+    % apply the logs and inverse G map.
+    dfval = ApplyMap(logGRho-logZRho,DualMap(krausOperators));
+end
 
-dfval = GradRenyiEntropy(alpha, gRho, zRho, krausOperators,keyProj);
 dfval = (dfval+dfval')/2; %remove any odd anti-Hermitian bits
 end

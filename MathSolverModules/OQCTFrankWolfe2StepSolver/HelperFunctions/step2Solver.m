@@ -1,10 +1,11 @@
-function lowerBound = step2Solver(rho,eqCons,ineqCons,vec1NormCons,mat1NormCons,krausOps,keyProj,alpha,options,debugInfo)
+function lowerBound = step2Solver(renyi,rho,eqCons,ineqCons,vec1NormCons,mat1NormCons,krausOps,keyProj,alpha,options,debugInfo)
 % Part of the FW2StepSolver. Don't use or touch this if you don't know what
 % that means.
 %
 % See also: FW2StepSolver
 arguments
     %very basic argument validation.
+    renyi logical
     rho (:,:) double {mustBeHermitian}
     eqCons (:,1) EqualityConstraint
     ineqCons (:,1) InequalityConstraint
@@ -22,10 +23,10 @@ end
 debugInfo.storeInfo("perturbationValue",perturbation);
 
 % 2. Calculate f_epsilon_p(rho) and gradftranspose of that
-fval = primalfep(perturbation, alpha, rho, keyProj, krausOps,safeCutOff);
+fval = primalfep(renyi, perturbation, alpha, rho, keyProj, krausOps,safeCutOff);
 debugInfo.storeInfo("relEntStep2Linearization",fval/log(2));
 
-gradf = primalDfep(perturbation, alpha, rho, keyProj, krausOps,safeCutOff); % numerator form
+gradf = primalDfep(renyi, perturbation, alpha, rho, keyProj, krausOps,safeCutOff); % numerator form
 
 
 % begin calculating lower bound

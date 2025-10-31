@@ -110,7 +110,6 @@ arguments
     options (1,1) struct
     debugInfo (1,1) DebugInfo
 end
-
 %% options
 
 %start with the global parser and add on the extra options
@@ -132,13 +131,12 @@ options = optionsParser.Results;
 modParser = moduleParser(mfilename);
 
 % kraus operators for G map and key projection operators for Z map
+modParser.addRequiredParam("renyi", @mustBeBoolean);
 modParser.addRequiredParam("krausOps",@mustBeNonempty);
 modParser.addAdditionalConstraint(@isCPTNIKrausOps,"krausOps");
 modParser.addRequiredParam("keyProj",@mustBeNonempty);
 modParser.addAdditionalConstraint(@mustBeAKeyProj,"keyProj");
 modParser.addRequiredParam("alpha", @(x) mustBeGreaterThan(x,1));
-
-
 
 %same dimension for matrix multiplication
 modParser.addAdditionalConstraint(@(x,y)size(x{1},1) == size(y{1},2),["krausOps","keyProj"])
@@ -197,7 +195,7 @@ eqCons = params.equalityConstraints;
 ineqCons = params.inequalityConstraints;
 vec1NormCons = params.vectorOneNormConstraints;
 mat1NormCons = params.matrixOneNormConstraints;
-
+renyi = params.renyi;
 
 %% Use rhoA to generate extra equality constraints
 
@@ -233,7 +231,7 @@ end
 
 
 % run step 1 routines
-[rho,relEntStep1,~] = step1Solver(rho0,eqCons,ineqCons,...
+[rho,relEntStep1,~] = step1Solver(renyi,rho0,eqCons,ineqCons,...
     vec1NormCons,mat1NormCons,params.krausOps,params.keyProj,params.alpha,options,debugInfo);
 
 relEntStep1 = relEntStep1/log(2);
@@ -246,7 +244,7 @@ debugInfo.storeInfo("relEntStep1",relEntStep1);
 epsilonForInitialPoint = perturbationChannelEpsilon(rho,0,"perturbationCheck",false);
 rho = perturbationChannel(rho,epsilonForInitialPoint);
 
-relEntLowerBound = step2Solver(rho,eqCons,ineqCons,vec1NormCons,...
+relEntLowerBound = step2Solver(renyi,rho,eqCons,ineqCons,vec1NormCons,...
     mat1NormCons,params.krausOps,params.keyProj,params.alpha,options,debugInfo);
 
 %return the step 1 rel ent
